@@ -13,6 +13,8 @@ Sin embargo, si este proyecto se está clonando, ya debería traer la info.
 `go get github.com/lib/pq`
 # Instalar dependencia que permitirá retornar el id como texto:
 `go get github.com/segmentio/ksuid`
+# Instalar bcrypt:
+`go get golang.org/x/crypto/bcrypt`
 
 # Ejecución
 En carpeta database, ejecutar:
