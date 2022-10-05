@@ -28,3 +28,7 @@ Hacer post, por ejemplo en postman:
     "email": "josephsosa@gmail.com",
     "password": "mypassword"
 }
+
+`docker build . -t platzi-rs-ws-db`
+`docker run -p 54321:5432 platzi-rs-ws-db`
+`go run main.g`

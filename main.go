@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"platzi.com/go/rest-ws/handlers"
+	"platzi.com/go/rest-ws/middleware"
 	"platzi.com/go/rest-ws/server"
 )
 
@@ -41,8 +42,16 @@ func main() {
 }
 
 func BindRoutes(s server.Server, r *mux.Router) {
+	r.Use(middleware.CheckAuthMiddleware(s))
 	// Se define el endpoint, la ruta "/" será manejada por el handler llamado HomeHandler que recibe el parámetro del servidor (s),
 	// y se define que tipo de método http se usará en el handler, en este caso es un get:
 	r.HandleFunc("/", handlers.HomeHandler(s)).Methods(http.MethodGet)
 	r.HandleFunc("/signup", handlers.SignUpHandler(s)).Methods(http.MethodPost)
+	r.HandleFunc("/login", handlers.LoginHandler(s)).Methods(http.MethodPost)
+	r.HandleFunc("/me", handlers.MeHandler(s)).Methods(http.MethodGet)
+	r.HandleFunc("/posts", handlers.InsertPostHandler(s)).Methods(http.MethodPost)
+	r.HandleFunc("/posts/{id}", handlers.GetPostByIDHandler(s)).Methods(http.MethodGet)
+	r.HandleFunc("/posts/{id}", handlers.UpdatePostByIdHandler(s)).Methods(http.MethodPut)
+	r.HandleFunc("/posts/{id}", handlers.DeletePostByIdHandler(s)).Methods(http.MethodDelete)
+	r.HandleFunc("/posts", handlers.ListPostHandler(s)).Methods(http.MethodGet)
 }
