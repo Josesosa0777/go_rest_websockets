@@ -162,3 +162,5 @@ o eliminar el post igual pasando en el campo de Headers como Key Authorization, 
 
 http://localhost:5050/api/v1/posts/2Fivq80aJ0z7OM8RdpJ9TdHznpi
 
+Para detener la aplicación ejecutar:
+`docker-compose down`
