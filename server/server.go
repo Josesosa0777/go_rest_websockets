@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	database "platzi.com/go/rest-ws/database"
 	repository "platzi.com/go/rest-ws/repository"
+	websocket "platzi.com/go/rest-ws/websocket"
 )
 
 // Definir un struct para la configuración que el servidor requiere para poder ejecutarse,
@@ -24,6 +25,7 @@ type Config struct {
 // Lo que indica que para que algo sea llamado un servidor, deberá tener algo de Config que retorne una Configuración tal como se definió arriba (Con port, llave y conexión a db)
 type Server interface {
 	Config() *Config
+	Hub() *websocket.Hub // con websocket, pasar el HUB en el server
 }
 
 // Definir el broker que será quien maneje los servidores que tendrá un archivo de configuración (config) con las propiedades definidas previamente (Con port, llave y conexión a db)
@@ -31,12 +33,18 @@ type Server interface {
 type Broker struct {
 	config *Config
 	router *mux.Router
+	hub    *websocket.Hub
 }
 
 // Se requiere que el broker satisfaga la interface, se crea un receiver function llamado Config() que retornará una configuración (*Config)
 // y lo que se hace es devolver la configuración
 func (b *Broker) Config() *Config {
 	return b.config
+}
+
+// crear nueva función llamada Hub perteneciente al broker, que devolverá un websocket.Hub:
+func (b *Broker) Hub() *websocket.Hub {
+	return b.hub
 }
 
 // Definir el constructor para el struct, que recibe 2 parámetros, primero un contexto que se usará para encontrar posibles problemas en el código,
@@ -57,6 +65,7 @@ func NewServer(ctx context.Context, config *Config) (*Broker, error) {
 	broker := &Broker{
 		config: config,
 		router: mux.NewRouter(), // Define una nueva instancia del broker
+		hub:    websocket.NewHub(),
 	}
 	return broker, nil
 }
@@ -73,6 +82,8 @@ func (b *Broker) Start(binder func(s Server, r *mux.Router)) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Para inicializar el hub:
+	go b.hub.Run()
 	// se envía el repo en el repository
 	repository.SetRepository(repo)
 	// Imprimir mensaje con el puerto en el que se ejecuta:
