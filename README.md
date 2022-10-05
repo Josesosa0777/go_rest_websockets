@@ -25,8 +25,10 @@ En carpeta principal, ejecutar:
 `go run main.go`
 
 Este es otro caso con otro tag:
+En carpeta database, ejecutar:
 `docker build . -t platzi-rs-ws-db`
 `docker run -p 54321:5432 platzi-rs-ws-db`
+En carpeta principal, ejecutar:
 `go run main.g`
 
 Ir a:
