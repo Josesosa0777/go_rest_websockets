@@ -1,0 +1,40 @@
+<html>
+<body>
+<h1>Post Application Tester</h1>
+</body>
+<script>
+    // CONECTARSE AL WEBSOCKET PARA IMPRIMIR EN CONSOLA LOS POST QUE VAN SIENDO CREADOS: 
+    // cuando la conexion es de tipo websocket, se debe pasar antes de la url ws:// para especificar el protocolo
+    var ws = new WebSocket("ws://localhost:5050/ws");
+    
+    // Listeners cuando se trabaja con websocket:
+    // Cuando el cliente se abra, es porque se conecta al websocket:
+    ws.onopen = function() {
+      console.log("Connected to server");
+    };
+
+    // cuando un mensaje enviado a través del broadcast llega al cliente:
+    ws.onmessage = function(event) {
+      console.log("Received message: " + event.data);
+    };
+
+    // si sucede un error:
+    ws.onerror = function(event) {
+      console.log("Error: " + event.data);
+    };
+
+    // fetch permite acceder al API y hacer un request 
+    fetch("http://localhost:5050/posts", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }).then(function(response) { // una vez que se pone el fetch se pone el then que funciona como una promesa para devolver el response
+      return response.json();
+    }).then(function(json) { // funcion que contiene la data en formato json
+      console.log('DATA RESPONSE')
+      console.log(json);
+    }); 
+
+  </script>
+</html>

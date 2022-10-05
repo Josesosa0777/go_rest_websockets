@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	database "platzi.com/go/rest-ws/database"
 	repository "platzi.com/go/rest-ws/repository"
 	websocket "platzi.com/go/rest-ws/websocket"
@@ -71,12 +72,14 @@ func NewServer(ctx context.Context, config *Config) (*Broker, error) {
 }
 
 // Agregar un método al broker que le permita ejecutarse, en ese caso se llama Start() que recibe una función como parámetro (binder),
-// La función binder recibe como parámetro un serviddor de tipo Server y un routeador:
+// La función binder recibe como parámetro un servidor de tipo Server y un routeador:
 func (b *Broker) Start(binder func(s Server, r *mux.Router)) {
 	// Trae un router nuevo, la manera como la librería lo hace es con NewRouter():
 	b.router = mux.NewRouter()
 	// Se pasa el binder que lleva los parámetros b y b.router (b de tipo servidor y b.router del router)
 	binder(b, b.router)
+	// agregar un handler para manejar las conexiones:
+	handler := cors.Default().Handler(b.router)
 	// crear repository con la configuracion de la db:
 	repo, err := database.NewPostgresRepository(b.config.DatabaseUrl)
 	if err != nil {
@@ -89,7 +92,9 @@ func (b *Broker) Start(binder func(s Server, r *mux.Router)) {
 	// Imprimir mensaje con el puerto en el que se ejecuta:
 	log.Println("starting server on port", b.config.Port)
 	// Ejecutar el servidor:
-	if err := http.ListenAndServe(b.config.Port, b.router); err != nil {
+	// if err := http.ListenAndServe(b.config.Port, b.router); err != nil {
+	// cambiar el segundo parámetro que era definido en el router (b.router), por el handler que da la función de Default().Handler
+	if err := http.ListenAndServe(b.config.Port, handler); err != nil {
 		log.Println("error starting server:", err)
 	} else {
 		log.Fatalf("server stopped")

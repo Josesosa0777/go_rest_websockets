@@ -42,17 +42,20 @@ func main() {
 }
 
 func BindRoutes(s server.Server, r *mux.Router) {
-	r.Use(middleware.CheckAuthMiddleware(s))
+	api := r.PathPrefix("/api/v1").Subrouter() // Subrouter dentro de api/v1
+	// En lugar de que el middleware sea usado en el router principal, lo que haremos es que se use en el subrouter que acabamos de crear (que lleva api/v1)
+	// Así, en lugar de usar r.Use, le ponemos api.Use para que todas las rutas de api sean las protegidas:
+	api.Use(middleware.CheckAuthMiddleware(s))
 	// Se define el endpoint, la ruta "/" será manejada por el handler llamado HomeHandler que recibe el parámetro del servidor (s),
 	// y se define que tipo de método http se usará en el handler, en este caso es un get:
 	r.HandleFunc("/", handlers.HomeHandler(s)).Methods(http.MethodGet)
 	r.HandleFunc("/signup", handlers.SignUpHandler(s)).Methods(http.MethodPost)
 	r.HandleFunc("/login", handlers.LoginHandler(s)).Methods(http.MethodPost)
-	r.HandleFunc("/me", handlers.MeHandler(s)).Methods(http.MethodGet)
-	r.HandleFunc("/posts", handlers.InsertPostHandler(s)).Methods(http.MethodPost)
+	api.HandleFunc("/me", handlers.MeHandler(s)).Methods(http.MethodGet)
+	api.HandleFunc("/posts", handlers.InsertPostHandler(s)).Methods(http.MethodPost)
 	r.HandleFunc("/posts/{id}", handlers.GetPostByIDHandler(s)).Methods(http.MethodGet)
-	r.HandleFunc("/posts/{id}", handlers.UpdatePostByIdHandler(s)).Methods(http.MethodPut)
-	r.HandleFunc("/posts/{id}", handlers.DeletePostByIdHandler(s)).Methods(http.MethodDelete)
+	api.HandleFunc("/posts/{id}", handlers.UpdatePostByIdHandler(s)).Methods(http.MethodPut)
+	api.HandleFunc("/posts/{id}", handlers.DeletePostByIdHandler(s)).Methods(http.MethodDelete)
 	r.HandleFunc("/posts", handlers.ListPostHandler(s)).Methods(http.MethodGet)
 	r.HandleFunc("/ws", s.Hub().HandleWebSocket)
 }
